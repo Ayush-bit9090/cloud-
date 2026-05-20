@@ -1,3 +1,6 @@
+from flask import Flask
+from threading import Thread
+
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -9,13 +12,47 @@ from telegram.ext import (
 
 import os
 
+# =========================
+# KEEP RENDER ALIVE
+# =========================
+
+web_app = Flask('')
+
+@web_app.route('/')
+def home():
+    return "Bot is running"
+
+def run_web():
+    web_app.run(host='0.0.0.0', port=10000)
+
+Thread(target=run_web).start()
+
+# =========================
+# BOT TOKEN
+# =========================
+
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
+
+# =========================
+# SAVE FOLDER
+# =========================
 
 SAVE_FOLDER = "downloads"
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 
+# =========================
+# START COMMAND
+# =========================
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("✅ Bot is online!")
+
+    await update.message.reply_text(
+        "✅ Bot is online!"
+    )
+
+# =========================
+# SAVE FILES
+# =========================
 
 async def save_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -47,6 +84,10 @@ async def save_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✅ File saved!"
         )
 
+# =========================
+# RUN BOT
+# =========================
+
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
@@ -64,4 +105,3 @@ app.add_handler(
 print("Bot started")
 
 app.run_polling()
-
