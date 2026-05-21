@@ -149,7 +149,7 @@ async def get_files(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await update.message.reply_text(
-        f"📂 Sending {len(files)} files..."
+        f"📂 Found {len(files)} files."
     )
 
     for file_name in files:
@@ -161,13 +161,21 @@ async def get_files(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         try:
 
-            await update.message.reply_document(
-                document=InputFile(file_path)
-            )
+            with open(file_path, "rb") as f:
+
+                await context.bot.send_document(
+                    chat_id=update.effective_chat.id,
+                    document=f,
+                    filename=file_name
+                )
 
         except Exception as e:
 
             print(e)
+
+            await update.message.reply_text(
+                f"❌ Failed: {file_name}"
+            )
 
 # =====================================
 # DELETE ALL FILES
